@@ -101,7 +101,7 @@ class AppSettings(BaseSettings):
 
 app_settings = AppSettings()
 # custom openapi.json and docs_url
-openapi_url="/ai/v1/openapi.json"
+# openapi_url="/ai/v1/openapi.json"
 # docs_url="/ai/v1/documentation"
 app = fastapi.FastAPI()
 
