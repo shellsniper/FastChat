@@ -102,8 +102,8 @@ class AppSettings(BaseSettings):
 app_settings = AppSettings()
 # custom openapi.json and docs_url
 openapi_url="/ai/v1/openapi.json"
-docs_url="/ai/v1/documentation"
-app = fastapi.FastAPI(openapi_url=openapi_url, docs_url=docs_url)
+# docs_url="/ai/v1/documentation"
+app = fastapi.FastAPI()
 
 headers = {"User-Agent": "FastChat API Server"}
 get_bearer_token = HTTPBearer(auto_error=False)
@@ -379,7 +379,6 @@ async def show_available_models():
     return ModelList(data=model_cards)
 
 
-@app.post("/v1chat/completions", dependencies=[Depends(check_api_key)])
 @app.post("/v1/chat/completions", dependencies=[Depends(check_api_key)])
 async def create_chat_completion(request: ChatCompletionRequest):
     """Creates a completion for the chat message"""
@@ -905,4 +904,4 @@ if __name__ == "__main__":
             ssl_certfile=os.environ["SSL_CERTFILE"],
         )
     else:
-        uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+        uvicorn.run(app, host=args.host, port=args.port, log_level="info", root_path="/nebula-ai")
