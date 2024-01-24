@@ -20,11 +20,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
+
 import httpx
 from pydantic import BaseSettings
 import shortuuid
 import tiktoken
 import uvicorn
+
+from fastapi.staticfiles import StaticFiles
 
 from fastchat.constants import (
     WORKER_API_TIMEOUT,
@@ -103,7 +106,7 @@ app_settings = AppSettings()
 # custom openapi.json and docs_url
 # openapi_url="/ai/v1/openapi.json"
 # docs_url="/ai/v1/documentation"
-app = fastapi.FastAPI()
+app = fastapi.FastAPI(docs_url=None, redoc_url=None)
 
 headers = {"User-Agent": "FastChat API Server"}
 get_bearer_token = HTTPBearer(auto_error=False)
@@ -378,7 +381,7 @@ async def show_available_models():
         model_cards.append(ModelCard(id=m, root=m, permission=[ModelPermission()]))
     return ModelList(data=model_cards)
 
-
+# @app.post("/v1chat/completions", dependencies=[Depends(check_api_key)])
 @app.post("/v1/chat/completions", dependencies=[Depends(check_api_key)])
 async def create_chat_completion(request: ChatCompletionRequest):
     """Creates a completion for the chat message"""
@@ -840,6 +843,19 @@ async def create_chat_completion(request: APIChatCompletionRequest):
     return ChatCompletionResponse(model=request.model, choices=choices, usage=usage)
 
 
+app.mount("/static", StaticFiles(directory="fastchat/serve/static/swagger-ui"), name="static")
+from fastapi.openapi.docs import (
+    get_swagger_ui_html,
+)
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title="星云安全中枢 - OpenAPI UI",
+        swagger_js_url="/static/swagger-ui-bundle.js",
+        swagger_css_url="/static/swagger-ui.css",
+    )
 ### END GENERAL API - NOT OPENAI COMPATIBLE ###
 
 
@@ -904,4 +920,12 @@ if __name__ == "__main__":
             ssl_certfile=os.environ["SSL_CERTFILE"],
         )
     else:
-        uvicorn.run(app, host=args.host, port=args.port, log_level="info", root_path="/nebula-ai")
+        # get the current working directory
+        current_working_directory = os.getcwd()
+
+        # print output to the console
+        print("current path is {}".format(current_working_directory))
+        
+        
+        # uvicorn.run(app, host=args.host, port=args.port, log_level="info", root_path="/nebula-ai")
+        uvicorn.run(app, host=args.host, port=args.port, log_level="info")
