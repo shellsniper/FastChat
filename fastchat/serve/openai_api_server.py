@@ -843,7 +843,7 @@ async def create_chat_completion(request: APIChatCompletionRequest):
     return ChatCompletionResponse(model=request.model, choices=choices, usage=usage)
 
 
-app.mount("/static", StaticFiles(directory="fastchat/serve/static/swagger-ui"), name="static")
+app.mount("/static", StaticFiles(directory="fastchat/serve/static"), name="static")
 from fastapi.openapi.docs import (
     get_swagger_ui_html,
 )
@@ -927,5 +927,5 @@ if __name__ == "__main__":
         print("current path is {}".format(current_working_directory))
         
         
-        # uvicorn.run(app, host=args.host, port=args.port, log_level="info", root_path="/nebula-ai")
-        uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+        uvicorn.run(app, host=args.host, port=args.port, log_level="info", root_path="/nebula-ai")
+        # uvicorn.run(app, host=args.host, port=args.port, log_level="info")
