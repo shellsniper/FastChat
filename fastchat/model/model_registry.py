@@ -550,3 +550,26 @@ register_model_info(
     "https://huggingface.co/IEITYuan",
     "Yuan2 is a Basemodel developed by IEI.",
 )
+
+# nebula
+
+register_model_info(
+    ["chatglm3-6b-32k"],
+    "chatglm",
+    "https://huggingface.co/THUDM/chatglm3-6b-32k",
+    "ChatGLM3-6B-32K在ChatGLM3-6B的基础上进一步强化了对于长文本的理解能力，能够更好的处理最多32K长度的上下文。",
+)
+
+register_model_info(
+    ["Qwen-14B-Chat"],
+    "qwen",
+    "Qwen-14B-Chat",
+    "通义千问-14B（Qwen-14B）是阿里云研发的通义千问大模型系列的140亿参数规模的模型。",
+)
+
+register_model_info(
+    ["pangu"],
+    "pangu",
+    "pangu",
+    "pg大模型",
+)

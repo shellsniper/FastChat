@@ -255,10 +255,10 @@ def pangu_api_stream_iter(
     # get keys and needed values
     ai2_key = api_key or os.environ.get("NEBULA_API_KEY")
     api_base = api_base or "https://api.nebulalab.top:8443/ai/v4"
-    model_id = "pangu-chat"
+    model_id = "pangu"
 
     # Make requests
-    gen_params = {
+    gen_params = { 
         "model": model_name,
         "prompt": messages,
         "temperature": temperature,
@@ -286,8 +286,7 @@ def pangu_api_stream_iter(
                 "opts": {
                     "max_tokens": max_new_tokens,
                     "temperature": temperature,
-                    "top_p": top_p,
-                    "logprobs": 1,  # increase for more choices
+                    "top_p": top_p
                 },
             },
         },
@@ -295,7 +294,7 @@ def pangu_api_stream_iter(
 
     if res.status_code != 200:
         logger.error(f"unexpected response ({res.status_code}): {res.text}")
-        raise ValueError("unexpected response from InferD", res)
+        raise ValueError("unexpected response from pangu", res)
 
     text = ""
     for line in res.iter_lines():
@@ -306,7 +305,7 @@ def pangu_api_stream_iter(
                     text += t
             else:
                 logger.error(f"unexpected part: {part}")
-                raise ValueError("empty result in InferD response")
+                raise ValueError("empty result in pangu response")
 
             data = {
                 "text": text,

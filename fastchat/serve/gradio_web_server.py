@@ -37,6 +37,7 @@ from fastchat.serve.api_provider import (
     openai_api_stream_iter,
     palm_api_stream_iter,
     init_palm_chat,
+    pangu_api_stream_iter
 )
 from fastchat.utils import (
     build_logger,
@@ -153,7 +154,7 @@ def get_model_list(
         models += ["gemini-pro"]
     # nebula
     if add_pangu:
-        models += ["pangu-34B"]
+        models += ["pangu"]
     models = list(set(models))
 
     hidden_models = ["gpt-4-0314", "gpt-4-0613"]
@@ -395,6 +396,15 @@ def bot_response(
         )
     elif model_name in ["palm-2", "gemini-pro"]:
         stream_iter = palm_api_stream_iter(
+            model_name,
+            state.palm_chat,
+            conv.messages[-2][1],
+            temperature,
+            top_p,
+            max_new_tokens,
+        )
+    elif model_name in ["pangu", "pangu-chat", "pangu-38B"]:
+        stream_iter = pangu_api_stream_iter(
             model_name,
             state.palm_chat,
             conv.messages[-2][1],
