@@ -404,13 +404,16 @@ def bot_response(
             max_new_tokens,
         )
     elif model_name in ["pangu", "pangu-chat", "pangu-38B"]:
+        model_info = openai_compatible_models_info[model_name]
+        prompt = conv.to_openai_api_messages()
         stream_iter = pangu_api_stream_iter(
-            model_name,
-            state.palm_chat,
-            conv.messages[-2][1],
+            model_info["model_name"],
+            prompt,
             temperature,
             top_p,
             max_new_tokens,
+            api_base=model_info["api_base"],
+            api_key=model_info["api_key"],
         )
     else:
         # Query worker address

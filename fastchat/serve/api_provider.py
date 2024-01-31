@@ -241,24 +241,23 @@ def ai2_api_stream_iter(
             yield data
 
 #  nebula - pangu
+
 def pangu_api_stream_iter(
     model_name,
     messages,
     temperature,
     top_p,
     max_new_tokens,
-    api_key=None,
     api_base=None,
+    api_key=None,
 ):
-    from requests import post
+    import openai
 
-    # get keys and needed values
-    ai2_key = api_key or os.environ.get("NEBULA_API_KEY")
-    api_base = api_base or "https://api.nebulalab.top:8443/ai/v4"
-    model_id = "pangu"
+    openai.api_base = api_base or "https://api.nebulalab.top:8443/ai/v4"
+    openai.api_key = api_key or os.environ["NEBULA_API_KEY"]
 
     # Make requests
-    gen_params = { 
+    gen_params = {
         "model": model_name,
         "prompt": messages,
         "temperature": temperature,
@@ -267,46 +266,17 @@ def pangu_api_stream_iter(
     }
     logger.info(f"==== request ====\n{gen_params}")
 
-    # AI2 uses vLLM, which requires that `top_p` be 1.0 for greedy sampling:
-    # https://github.com/vllm-project/vllm/blob/v0.1.7/vllm/sampling_params.py#L156-L157
-    if temperature == 0.0 and top_p < 1.0:
-        raise ValueError("top_p must be 1 when temperature is 0.0")
-
-    res = post(
-        api_base,
+    res = openai.ChatCompletion.create(
+        model=model_name,
+        messages=messages,
+        temperature=temperature,
+        max_tokens=max_new_tokens,
         stream=True,
-        headers={"Authorization": f"Bearer {ai2_key}"},
-        json={
-            "model_id": model_id,
-            # This input format is specific to the Tulu2 model. Other models
-            # may require different input formats. See the model's schema
-            # documentation on InferD for more information.
-            "input": {
-                "messages": messages,
-                "opts": {
-                    "max_tokens": max_new_tokens,
-                    "temperature": temperature,
-                    "top_p": top_p
-                },
-            },
-        },
     )
-
-    if res.status_code != 200:
-        logger.error(f"unexpected response ({res.status_code}): {res.text}")
-        raise ValueError("unexpected response from pangu", res)
-
     text = ""
-    for line in res.iter_lines():
-        if line:
-            part = loads(line)
-            if "result" in part and "output" in part["result"]:
-                for t in part["result"]["output"]["text"]:
-                    text += t
-            else:
-                logger.error(f"unexpected part: {part}")
-                raise ValueError("empty result in pangu response")
-
+    for chunk in res:
+        if len(chunk["choices"]) > 0:
+            text += chunk["choices"][0]["delta"].get("content", "")
             data = {
                 "text": text,
                 "error_code": 0,
