@@ -122,7 +122,7 @@ def get_conv_log_filename():
 
 
 def get_model_list(
-    controller_url, register_openai_compatible_models, add_chatgpt, add_claude, add_palm
+    controller_url, register_openai_compatible_models, add_chatgpt, add_claude, add_palm, add_pangu
 ):
     if controller_url:
         ret = requests.post(controller_url + "/refresh_all_workers")
@@ -151,6 +151,9 @@ def get_model_list(
         models += ["claude-2.1", "claude-2.0", "claude-instant-1"]
     if add_palm:
         models += ["gemini-pro"]
+    # nebula
+    if add_pangu:
+        models += ["pangu-34B"]
     models = list(set(models))
 
     hidden_models = ["gpt-4-0314", "gpt-4-0613"]
@@ -193,6 +196,8 @@ def load_demo(url_params, request: gr.Request):
             args.add_chatgpt,
             args.add_claude,
             args.add_palm,
+            # nebula
+            args.add_pangu
         )
 
     return load_demo_single(models, url_params)
@@ -854,6 +859,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Add Google's PaLM model (PaLM 2 for Chat: chat-bison@001)",
     )
+    # nebula
+    parser.add_argument(
+        "--add-pangu",
+        action="store_true",
+        help="Add Pangu Model",
+    )
     parser.add_argument(
         "--register-openai-compatible-models",
         type=str,
@@ -880,6 +891,8 @@ if __name__ == "__main__":
         args.add_chatgpt,
         args.add_claude,
         args.add_palm,
+        # Nebula models
+        args.add_pangu
     )
 
     # Set authorization credentials
